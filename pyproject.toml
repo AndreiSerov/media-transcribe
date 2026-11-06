@@ -1,0 +1,29 @@
+[project]
+name = "media-transcribe"
+version = "0.1.0"
+description = "Transcribe audio from Boosty, YouTube, podcasts and local files on Apple Silicon"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "mlx-whisper>=0.4.3",
+    "yt-dlp[default]>=2026.10.26",
+]
+
+[project.scripts]
+media-transcribe = "media_transcribe.cli:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "ruff>=0.8",
+]
+
+[build-system]
+requires = ["uv_build>=0.10.7,<0.11.0"]
+build-backend = "uv_build"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
