@@ -1,6 +1,8 @@
 """Run Whisper locally and write the Transcript files."""
 
+import contextlib
 import json
+import sys
 from pathlib import Path
 
 MODELS = {
@@ -14,14 +16,16 @@ def run(path: Path, model: str, language: str | None) -> dict:
     # Imported here because mlx-whisper takes seconds to load and --help should not wait.
     import mlx_whisper
 
-    return mlx_whisper.transcribe(
-        str(path),
-        path_or_hf_repo=MODELS[model],
-        language=language,
-        # Without earlier text as a prompt, one misheard phrase cannot repeat in a loop.
-        condition_on_previous_text=False,
-        verbose=False,
-    )
+    # mlx-whisper prints the detected language to stdout, which is reserved for the Transcript path.
+    with contextlib.redirect_stdout(sys.stderr):
+        return mlx_whisper.transcribe(
+            str(path),
+            path_or_hf_repo=MODELS[model],
+            language=language,
+            # Without earlier text as a prompt, one misheard phrase cannot repeat in a loop.
+            condition_on_previous_text=False,
+            verbose=False,
+        )
 
 
 def stamp(seconds: float) -> str:

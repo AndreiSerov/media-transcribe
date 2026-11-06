@@ -1,4 +1,6 @@
 import json
+import sys
+import types
 
 from media_transcribe import cli, sources, transcribe
 
@@ -7,6 +9,20 @@ RESULT = {"language": "ru", "segments": [{"start": 3725.9, "end": 3727.0, "text"
 
 def test_stamp_formats_hours_minutes_seconds():
     assert transcribe.stamp(3725.9) == "01:02:05"
+
+
+def test_run_keeps_whisper_output_off_stdout(tmp_path, monkeypatch, capsys):
+    def fake_transcribe(path, **options):
+        print("Detected language: English")
+        return RESULT
+
+    monkeypatch.setitem(
+        sys.modules, "mlx_whisper", types.SimpleNamespace(transcribe=fake_transcribe)
+    )
+    assert transcribe.run(tmp_path / "call.mp3", "tiny", None) == RESULT
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "Detected language: English" in captured.err
 
 
 def test_write_outputs_writes_text_and_json_with_metadata(tmp_path):
